@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake???</title>
+
+    <style>
+        #board {
+            border: 5px solid black;
+        }
+        .row {
+            display: flex;
+            flex-direction: row;
+        }
+        .cell {
+            height: 75px;
+            width: 75px;
+            background-color:aquamarine;
+        }
+        .cell-player {
+            height: 75px;
+            width: 75px;
+            background-color:crimson;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="init"></div>
+
+    <div id="board"></div>
+
+    <div id="endgame"></div>
+</body>
+
+<script>
+    // Lógica
+
+    let rows = 12;
+    let columns = 12;
+    let playerPositions = [[0,0]];
+
+    let board = initializeBoard(rows, columns);
+    drawBoard('board', board);
+
+    // Movimentação
+
+    window.addEventListener("keydown", function (event) {
+        if (event.defaultPrevented) {
+            return; // Do nothing if the event was already processed
+        }
+
+        switch (event.key) {
+            case "ArrowDown":
+                moveDown();
+                break;
+            case "ArrowUp":
+                moveUp();
+                break;
+            case "ArrowLeft":
+                moveLeft();
+                break;
+            case "ArrowRight":
+                moveRight();
+                break;
+            default:
+                return;
+        }
+        
+        // Cancel the default action to avoid it being handled twice
+        event.preventDefault();
+    }, true);
+
+    function getActualPosition() {
+        return playerPositions[playerPositions.length - 1];
+    }
+
+    function getActualX() {
+        return playerPositions[playerPositions.length - 1][1];
+    }
+
+    function getActualY() {
+        return playerPositions[playerPositions.length - 1][0];
+    }
+
+    function checkMovement(newPosition) {
+        for (let i = 0; i < playerPositions.length; i++) {
+            let position = playerPositions[i];
+            
+            if (position[0] == newPosition[0] && position[1] == newPosition[1]) {
+                return 'invalid';
+            }
+        }
+        return 'valid';
+    }
+
+    function drawMovement(newPosition) {
+        console.log(checkMovement(newPosition));
+        if (checkMovement(newPosition) == 'invalid') {
+            return;
+        }
+
+        // Removendo última posição
+        if (playerPositions.length == rows) {
+            let lastPostion = playerPositions.shift();
+            board[lastPostion[0]][lastPostion[1]] = 0;
+        }
+        
+        playerPositions.push(newPosition);
+        board[newPosition[0]][newPosition[1]] = 1;
+        drawBoard('board', board);
+    }
+
+    function moveUp() {
+        let position = getActualPosition();
+
+        if (getActualY() > 0) {
+            let newPosition = [position[0] - 1, position[1]];
+            drawMovement(newPosition);
+        }
+    }
+
+    function moveDown() {
+        let position = getActualPosition();
+
+        if (getActualY() < rows - 1) {
+            let newPosition = [position[0] + 1, position[1]];
+            drawMovement(newPosition);
+        }
+    }
+
+    function moveLeft() {
+        let position = getActualPosition();
+
+        if (getActualX() > 0) {
+            let newPosition = [position[0], position[1] - 1];
+            drawMovement(newPosition);
+        }
+    }
+
+    function moveRight() {
+        let position = getActualPosition();
+
+        if (getActualX() < columns - 1) {
+            let newPosition = [position[0], position[1] + 1];
+            drawMovement(newPosition);
+        }
+    }
+
+    // Auxiliares
+
+    function initializeBoard(rows, columns) {
+        let board = [];
+
+        for (let i = 0; i < rows; i++) {
+            let row = [];
+    
+            for (var j = 0; j < columns; j++) {
+                if (i == 0 && j == 0) {
+                    row.push(1);
+                }
+                else {
+                    row.push(0);
+                }
+            }
+    
+            board[i] = row;
+        }
+
+        return board;
+    }
+
+    function drawBoard(boardId, data) {
+        document.getElementById(boardId).innerHTML = "";
+
+        for (let i = 0; i < data.length; i++) {
+            let row = board[i];
+            let rowTag = createRow();
+
+            for (var j = 0; j < row.length; j++) {
+                if (data[i][j] == 1) {
+                    addCellRow(rowTag, '', 'player');
+                }
+                else {
+                    addCellRow(rowTag, '', 'empty');
+                }
+            }
+
+            addRowBoard(boardId, rowTag);
+        }
+    }
+
+    function addRowBoard(boardId, row) {
+        let board = document.getElementById(boardId);
+        board.appendChild(row);
+    }
+
+    function createRow() {
+        let row = document.createElement("div");
+        row.classList.add("row");
+        return row;
+    }
+
+    function addCellRow(row, content, cellType) {
+        let cell = createCell(content, cellType);
+        row.appendChild(cell);
+        return row;
+    }
+
+    function checkCellType(cellType) {
+        if (cellType == 'player') {
+            return 'cell-player'
+        }
+        
+        return 'cell';
+    }
+
+    function createCell(content, cellClass) {
+        let text = document.createTextNode(content);
+        let tag = document.createElement("div");
+        tag.classList.add(checkCellType(cellClass));
+        tag.appendChild(text);
+        return tag;
+    }
+
+</script>
+</html>
