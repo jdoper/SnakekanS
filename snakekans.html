@@ -24,6 +24,10 @@
             width: 75px;
             background-color:crimson;
         }
+        .game-over {
+            border: 5px solid black;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -41,11 +45,33 @@
     let rows = 12;
     let columns = 12;
     let playerPositions = [[0,0]];
+    let playerMovement = '';
 
     let board = initializeBoard(rows, columns);
     drawBoard('board', board);
 
+    let movementUpdate = setInterval(movePlayer, 1000);
+
     // Movimentação
+
+    function movePlayer() {
+        switch (playerMovement) {
+            case "ArrowDown":
+                moveDown();
+                break;
+            case "ArrowUp":
+                moveUp();
+                break;
+            case "ArrowLeft":
+                moveLeft();
+                break;
+            case "ArrowRight":
+                moveRight();
+                break;
+            default:
+                return;
+        }
+    }
 
     window.addEventListener("keydown", function (event) {
         if (event.defaultPrevented) {
@@ -97,8 +123,8 @@
     }
 
     function drawMovement(newPosition) {
-        console.log(checkMovement(newPosition));
         if (checkMovement(newPosition) == 'invalid') {
+            gameOver('board', 'endgame', 'Game Over');
             return;
         }
 
@@ -115,37 +141,53 @@
 
     function moveUp() {
         let position = getActualPosition();
+        playerMovement = "ArrowUp";
 
         if (getActualY() > 0) {
             let newPosition = [position[0] - 1, position[1]];
             drawMovement(newPosition);
         }
+        else {
+            gameOver('board', 'endgame', 'Game Over');
+        }
     }
 
     function moveDown() {
         let position = getActualPosition();
+        playerMovement = "ArrowDown";
 
         if (getActualY() < rows - 1) {
             let newPosition = [position[0] + 1, position[1]];
             drawMovement(newPosition);
         }
+        else {
+            gameOver('board', 'endgame', 'Game Over');
+        }
     }
 
     function moveLeft() {
         let position = getActualPosition();
+        playerMovement = "ArrowLeft";
 
         if (getActualX() > 0) {
             let newPosition = [position[0], position[1] - 1];
             drawMovement(newPosition);
         }
+        else {
+            gameOver('board', 'endgame', 'Game Over');
+        }
     }
 
     function moveRight() {
         let position = getActualPosition();
+        playerMovement = "ArrowRight";
 
         if (getActualX() < columns - 1) {
             let newPosition = [position[0], position[1] + 1];
             drawMovement(newPosition);
+        }
+        else {
+            gameOver('board', 'endgame', 'Game Over');
         }
     }
 
@@ -190,6 +232,19 @@
 
             addRowBoard(boardId, rowTag);
         }
+    }
+
+    function gameOver(boardId, endGameId, textMessage) {
+        document.getElementById(boardId).innerHTML = "";
+        
+        let text = document.createTextNode(textMessage);
+        let tag = document.createElement("div");
+        tag.classList.add("game-over");
+        tag.appendChild(text);
+
+        let endGame = document.getElementById(endGameId);
+        endGame.appendChild(tag);
+        clearInterval(movementUpdate);
     }
 
     function addRowBoard(boardId, row) {
